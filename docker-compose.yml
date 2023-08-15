@@ -92,6 +92,7 @@ services:
       - INFLUXDB_HTTP_AUTH_ENABLED
       - INFLUXDB_ADMIN_USER
       - INFLUXDB_ADMIN_PASSWORD
+      - HOME=/var/lib/influxdb
     restart: always
     networks:
       - default
