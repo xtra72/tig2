@@ -1,14 +1,10 @@
 var/lib/influxdb/
 var/lib/mosquitto/
-var/lib/node-red/.config.nodes.json.backup
-var/lib/node-red/.npm/_cacache/
+var/lib/node-red/
 setup/generic/tig/etc/telegraf/telegraf.d/etc.inputs.mqtt.outputs.influxdb.conf
 setup/generic/tig/etc/telegraf/telegraf.d/system.conf
-var/lib/mosquitto/mosquitto.db
-var/lib/grafana/grafana.db
-var/lib/node-red/.config.nodes.json
-var/lib/node-red/.config.nodes.json.backup
-var/lib/node-red/.npm/_cacache/
+var/lib/mosquitto/
+var/lib/grafana/
 *.backup
 *.orig
 node_modules

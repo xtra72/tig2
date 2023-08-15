@@ -17,7 +17,7 @@ if [ ! -d "${CONFIG}" ]; then
 fi
 
 mkdir_quietly ${DATA}/lib
-services="grafana influxdb node-red mosquitto"
+services="chirpstack chirpstack-gateway-bridge grafana influxdb postgresql redis node-red mosquitto"
 for service in $services
 do
   mkdir_quietly ${DATA}/lib/${service}
@@ -25,7 +25,7 @@ done
 
 # Configure more for InfluxDB
 INFLUXDB_DATA=${DATA}/lib/influxdb
-touch "${INFLUXDB_DATA}/.influx_history"
+#touch "${INFLUXDB_DATA}/.influx_history"
 if [ ! -d "${INFLUXDB_DATA}/meta" ]; then
   # db에 아무런 기본 설정이 안되어 있으므로 /init-influxdb.sh를 돌려서 db 초기
   # 설정을 한다. 여기에 뭔가 보태고 싶다면 etc/influxdb/initdb.d 폴더에 *.sh이나
@@ -37,6 +37,15 @@ fi
 mkdir_quietly ${DATA}/log/mosquitto
 
 sudo chown -R ${TIG_USER_ID}:${TIG_GROUP_ID} ${CONFIG} ${DATA}
+
+# Configure more for node-red
+mkdir_quietly ${DATA}/lib/node-red/data
+
+# Configure more for postgres
+mkdir_quietly ${DATA}/lib/postgres/data
+
+# Configure more for redis
+mkdir_quietly ${DATA}/lib/redis/data
 
 # 참고
 # MQTT 입력 플러그인 설정]

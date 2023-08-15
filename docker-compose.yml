@@ -30,6 +30,8 @@ services:
       - 1700:1700/udp
     volumes:
       - ./setup/chirpstack-gateway-bridge:/etc/chirpstack-gateway-bridge
+    environment:
+      - MQTT_BROKER_HOST=mosquitto
     depends_on:
       - mosquitto
 
@@ -103,7 +105,7 @@ services:
     restart: unless-stopped
     volumes:
       - ./setup/postgresql/initdb:/docker-entrypoint-initdb.d
-      - ./data/postgresql:/var/lib/postgresql/data
+      - ./var/lib/postgresql/data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=root
 
@@ -116,7 +118,7 @@ services:
     restart: unless-stopped
     user: ${TIG_USER_ID}:${TIG_GROUP_ID}
     volumes:
-      - ./data/redis:/data:rw
+      - ./var/lib/redis/data/redis:/data:rw
 
   telegraf:
     image: telegraf
