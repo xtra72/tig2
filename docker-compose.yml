@@ -10,14 +10,14 @@ services:
     volumes:
       - ./setup/chirpstack:/etc/chirpstack
       - ./lorawan-devices:/opt/lorawan-devices
-    depends_on:
-      - postgres
-      - mosquitto
-      - redis
     environment:
       - MQTT_BROKER_HOST=mosquitto
       - REDIS_HOST=redis
       - POSTGRESQL_HOST=postgres
+    depends_on:
+      - postgres
+      - mosquitto
+      - redis
     ports:
       - 8080:8080
 
@@ -26,14 +26,16 @@ services:
     container_name: chirpstack-gateway-bridge
     hostname: chirpstack-gateway-bridge
     restart: unless-stopped
-    ports:
-      - 1700:1700/udp
     volumes:
       - ./setup/chirpstack-gateway-bridge:/etc/chirpstack-gateway-bridge
     environment:
       - MQTT_BROKER_HOST=mosquitto
     depends_on:
       - mosquitto
+    ports:
+      - 1700:1700/udp
+    networks:
+      - default
 
   chirpstack-rest-api:
     image: chirpstack/chirpstack-rest-api:4
@@ -41,49 +43,50 @@ services:
     hostname: chirpstack-rest-api
     restart: unless-stopped
     command: --server chirpstack:8080 --bind 0.0.0.0:8090 --insecure
-    ports:
-      - 8090:8090
     depends_on:
       - chirpstack
+    ports:
+      - 8090:8090
+    networks:
+      - default
 
   mosquitto:
     image: eclipse-mosquitto:latest
-    networks:
-      - default
     container_name: mosquitto
+    user: ${TIG_USER_ID}:${TIG_GROUP_ID}
+    restart: always
+    volumes:
+      - ./etc/mosquitto:/mosquitto/config:rw
+      - ./var/lib/mosquitto:/mosquitto/data:rw
+      - ./var/log/mosquitto:/mosquitto/log:rw
     expose:
       - "1883"
       - "9001"
     ports:
       - "1883:1883"
       - "9001:9001"
-    user: ${TIG_USER_ID}:${TIG_GROUP_ID}
-    volumes:
-      - ./etc/mosquitto:/mosquitto/config:rw
-      - ./var/lib/mosquitto:/mosquitto/data:rw
-      - ./var/log/mosquitto:/mosquitto/log:rw
-    restart: always
+    networks:
+      - default
 
   node-red:
     build: ./setup/node-red
     container_name: node-red
     hostname: node-red
-    restart: always
-    networks:
-      - default
     user: ${TIG_USER_ID}:${TIG_GROUP_ID}
-    ports:
-      - "1880:1880"
+    restart: always
     volumes:
       - ./var/lib/node-red:/data:rw
+    ports:
+      - "1880:1880"
+    networks:
+      - default
 
   influxdb:
     image: influxdb:1.8
     container_name: influxdb
     hostname: influxdb
-    ports:
-      - "8086:8086"
     user: ${TIG_USER_ID}:${TIG_GROUP_ID}
+    restart: always
     volumes:
       - ./var/lib/influxdb:/var/lib/influxdb
       - ./etc/influxdb/influxdb.conf:/etc/influxdb/influxdb.conf:ro
@@ -93,7 +96,8 @@ services:
       - INFLUXDB_ADMIN_USER
       - INFLUXDB_ADMIN_PASSWORD
       - HOME=/var/lib/influxdb
-    restart: always
+    ports:
+      - "8086:8086"
     networks:
       - default
 
@@ -101,34 +105,35 @@ services:
     image: postgres:14-alpine
     container_name: postgres
     hostname: postgres
-    ports:
-      - "5432:5432"
     restart: unless-stopped
     volumes:
       - ./setup/postgresql/initdb:/docker-entrypoint-initdb.d
       - ./var/lib/postgresql/data:/var/lib/postgresql/data
     environment:
       - POSTGRES_PASSWORD=root
+    ports:
+      - "5432:5432"
 
   redis:
     image: redis:7-alpine
     container_name: redis
     hostname: redis
+    user: ${TIG_USER_ID}:${TIG_GROUP_ID}
+    restart: unless-stopped
+    volumes:
+      - ./var/lib/redis/data:/data:rw
     ports:
       - "6379:6379"
-    restart: unless-stopped
-    user: ${TIG_USER_ID}:${TIG_GROUP_ID}
-    volumes:
-      - ./var/lib/redis/data/redis:/data:rw
 
   telegraf:
     image: telegraf
     container_name: telegraf
     hostname: telegraf
-    ports:
-      - "8092:8092" # UDP
-      - "8094:8094" # TCP
     user: ${TIG_USER_ID}:${TIG_GROUP_ID}
+    command:
+      - telegraf
+      - --config-directory
+      - ${TELEGRAF_CONFIG_DIRECTORY}
     volumes:
       - ./etc/telegraf:/etc/telegraf:ro
       - /:/hostfs:ro
@@ -139,11 +144,10 @@ services:
       - HOST_VAR
       - HOST_RUN
       - HOST_MOUNT_PREFIX
-    command:
-      - telegraf
-      - --config-directory
-      - ${TELEGRAF_CONFIG_DIRECTORY}
     restart: always
+    ports:
+      - "8092:8092" # UDP
+      - "8094:8094" # TCP
     networks:
       - default
     # depends_on:
@@ -154,15 +158,15 @@ services:
     image: grafana/grafana-oss:10.0.3-ubuntu
     container_name: grafana
     hostname: grafana
-    ports:
-      - "80:3000"
     user: ${TIG_USER_ID}:${TIG_GROUP_ID}
+    restart: always
     volumes:
       - ./var/lib/grafana:/var/lib/grafana:rw
       - ./etc/grafana:/etc/grafana:ro
-    restart: always
     # depends_on:
     #   - influxdb
+    ports:
+      - "80:3000"
     networks:
       - default
 
