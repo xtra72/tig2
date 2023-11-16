@@ -46,20 +46,20 @@ sudo dpkg-reconfigure locales
 
 ```sh
 # 원본을 고치고 싶은 경우에만 필요한 설정
-# GitLab 계정은 `https://gitlab.com/futuregateway`
-git config --global user.name "Future ICT"
-git config --global user.email "futureict@futureict.co.kr"
+# GitLab 계정은 `https://gitlab.com/xtra72`
+git config --global user.name "xtra72"
+git config --global user.email "xtra72@gmail.com"
 
-# `~/.ssh/id_ed25519.pub`를 `https://gitlab.com/futuregateway`에 올린다.
+# `~/.ssh/id_ed25519.pub`를 `https://gitlab.comx/xtra72`에 올린다.
 # GitLab 계정에 인증키 올리는 [방법](https://docs.gitlab.com/ee/ssh/README.html#generate-an-ssh-key-pair)
-# (futuregateway는 `git@gitlab.com:kizoo/tig.git`의 관리자)
+# (xtra72는 `git@gitlab.com:xtra72/tig2.git`의 관리자)
 ssh-keygen -t ed25519 -C "서버 인증용 SSH 키 생성"
 
 # master 한 가지에서 최신판만 복제
-git clone --branch master --depth 1 --single-branch git@gitlab.com:kizoo/tig.git
+git clone --branch master --depth 1 --single-branch https://github.com/xtra72/tig2.git
 
 # 원본을 함께 개발할 목적으로 서버를 설치하는 경우에는:
-# git clone git@gitlab.com:kizoo/tig.git
+# git clone git@gitlab.com:xtra72/tig2.git
 ```
 
 ## Docker
